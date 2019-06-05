@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -70,6 +71,17 @@ func GenerateMD5(data *string) string {
 	hasher := md5.New()
 	hasher.Write([]byte(*data))
 	return hex.EncodeToString(hasher.Sum(nil))
+}
+
+//RemoveUnusedChars remove unused chars from string
+func RemoveUnusedChars(data string) string {
+	pattern := regexp.MustCompile(`(\s*<!--.*-->\s*)|(\s+)`)
+	return pattern.ReplaceAllString(data, " ")
+}
+
+//HasMaxFailures check if reached the max failures
+func HasMaxFailures(failures *int) bool {
+	return *failures >= EngineConfig["MaxFailures"].(int)
 }
 
 //GetElasticMapping - returns the default Elasticsearch mapping
