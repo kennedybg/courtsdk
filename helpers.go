@@ -2,6 +2,8 @@ package courtsdk
 
 import (
 	"context"
+	"crypto/md5"
+	"encoding/hex"
 	"log"
 	"net/http"
 	"os"
@@ -61,6 +63,13 @@ func GetDefaultcollector() *colly.Collector {
 //GetNewContext - return a new context with default timeout and context cancelation function.
 func GetNewContext() (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), EngineConfig["RequestTimeout"].(time.Duration)*time.Second)
+}
+
+//GenerateMD5 - returns the MD5 hash of the given pointer value.
+func GenerateMD5(data *string) string {
+	hasher := md5.New()
+	hasher.Write([]byte(*data))
+	return hex.EncodeToString(hasher.Sum(nil))
 }
 
 //GetElasticMapping - returns the default Elasticsearch mapping
