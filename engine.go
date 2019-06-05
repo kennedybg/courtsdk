@@ -26,6 +26,21 @@ func Base(base string) func(*Engine) {
 	}
 }
 
+// Start set the start index
+func Start(start int) func(*Engine) {
+	return func(eng *Engine) {
+		ControlConfig["LastGoRoutineRange"] = start - 1
+		eng.Start = start
+	}
+}
+
+// End set the end index
+func End(end int) func(*Engine) {
+	return func(eng *Engine) {
+		eng.End = end
+	}
+}
+
 // PageSize set the pagination size.
 func PageSize(pageSize int) func(*Engine) {
 	return func(engine *Engine) {

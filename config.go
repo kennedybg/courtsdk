@@ -15,3 +15,8 @@ var EngineConfig = map[string]interface{}{
 	"GoRoutineRange":      GetEnvInt("ENGINE_GOROUTINE_RANGE", 200),
 	"MaxRecoveries":       GetEnvInt("ENGINE_MAX_RECOVERIES", 5),
 }
+
+//ControlConfig - Config the control behavior
+var ControlConfig = map[string]interface{}{
+	"LastGoRoutineRange": -1,
+}
