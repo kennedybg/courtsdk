@@ -49,9 +49,9 @@ func GetEnvString(envVar string, Default string) string {
 
 //GetDefaultcollector - return the default collector (colly)
 func GetDefaultcollector() *colly.Collector {
-	collector := colly.NewCollector(colly.Async(EngineConfig["isAsync"].(bool)))
+	collector := colly.NewCollector(colly.Async(EngineConfig["IsAsync"].(bool)))
 	if DebugEnv() {
-		collector = colly.NewCollector(colly.Async(EngineConfig["isAsync"].(bool)),
+		collector = colly.NewCollector(colly.Async(EngineConfig["IsAsync"].(bool)),
 			colly.Debugger(&debug.LogDebugger{}))
 	}
 	transport := &http.Transport{}

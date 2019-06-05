@@ -16,7 +16,7 @@ var ElasticConfig = map[string]interface{}{
 
 //EngineConfig - Config engine behavior
 var EngineConfig = map[string]interface{}{
-	"isAsync":             strings.ToUpper(GetEnvString("ENGINE_IS_ASYNC", "TRUE")) == "TRUE",
+	"IsAsync":             strings.ToUpper(GetEnvString("ENGINE_IS_ASYNC", "TRUE")) == "TRUE",
 	"MaxFailures":         GetEnvInt("ENGINE_MAX_FAILURES", 25),
 	"RequestsPerInterval": GetEnvInt("ENGINE_REQUESTS_PER_INTERVAL", 10),
 	"RequestDelay":        time.Duration(GetEnvInt("ENGINE_REQUEST_DELAY", 3500)),
@@ -27,7 +27,8 @@ var EngineConfig = map[string]interface{}{
 
 //ControlConfig - Config the control behavior
 var ControlConfig = map[string]interface{}{
-	"isConcurrent":       strings.ToUpper(GetEnvString("CONTROL_IS_CONCURRENT", "FALSE")) == "TRUE",
-	"LastGoRoutineRange": -1,
-	"ActionDelay":        time.Duration(GetEnvInt("CONTROL_ACTION_DELAY", 25)),
+	"IsConcurrent":         strings.ToUpper(GetEnvString("CONTROL_IS_CONCURRENT", "FALSE")) == "TRUE",
+	"MaxConcurrentEngines": GetEnvInt("CONTROL_MAX_CONCURRENT_ENGINES", 2),
+	"LastGoRoutineRange":   -1,
+	"ActionDelay":          time.Duration(GetEnvInt("CONTROL_ACTION_DELAY", 25)),
 }
