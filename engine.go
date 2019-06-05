@@ -227,7 +227,7 @@ func (engine *Engine) runAsConcurrent() {
 		default:
 			if activeEngines < maxEngines {
 				activeEngines++
-				//Go run engine...
+				go engine.spawnEngine(activeEnginesChannel, maxEnginesChannel)
 			}
 		}
 	}
