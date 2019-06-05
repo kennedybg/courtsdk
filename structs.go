@@ -39,3 +39,8 @@ type Jurisprudence struct {
 	CreatedAt        time.Time `json:"inserted_at"`
 	UpdatedAt        time.Time `json:"updated_at"`
 }
+
+//Control is a structure used for define information about the main execution.
+type Control struct {
+	Engines []Engine
+}
