@@ -9,7 +9,17 @@ import (
 
 // NewEngine creates a new Engine instance with default configuration
 func NewEngine(options ...func(*Engine)) *Engine {
-	return &Engine{}
+	engine := &Engine{}
+	engine.Collector = GetDefaultcollector()
+	engine.ResponseChannel = make(chan int)
+	engine.Done = false
+	engine.PageSize = 1
+	var wg sync.WaitGroup
+	engine.Lock = &wg
+	for _, attr := range options {
+		attr(engine)
+	}
+	return engine
 }
 
 // Court set the current court.
