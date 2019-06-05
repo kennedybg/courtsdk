@@ -41,8 +41,7 @@ func (control *Control) Start() {
 			//TODO
 			log.Println(engine)
 		} else {
-			//TODO
-			log.Println(engine)
+			engine.runAsSequential()
 		}
 		log.Println("[CONTROL] Awaiting to start next base. If there is a network error, there will be time to reconnect.")
 		time.Sleep(ControlConfig["ActionDelay"].(time.Duration) * time.Second)

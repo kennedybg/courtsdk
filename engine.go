@@ -173,3 +173,14 @@ func (engine *Engine) Persist(jurisprudence Jurisprudence) {
 	}
 	engine.ResponseChannel <- http.StatusOK
 }
+
+func (engine *Engine) runAsSequential() {
+	engine.InitElastic()
+	if engine.ConnectedToIndex() {
+		engine.Recoveries = 0
+		for engine.Recoveries < EngineConfig["MaxRecoveries"].(int) {
+			engine.EntryPoint(engine)
+
+		}
+	}
+}
