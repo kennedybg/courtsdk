@@ -215,6 +215,17 @@ func (engine *Engine) runAsConcurrent() {
 	}
 }
 
+//SetRange - set a valid range for an engine
+func (engine *Engine) setRange() {
+	lastRange := ControlConfig["LastGoRoutineRange"].(int)
+	engine.Start = lastRange + 1
+	engine.End = lastRange + EngineConfig["GoRoutineRange"].(int)
+	if lastRange < engine.End {
+		ControlConfig["LastGoRoutineRange"] = engine.End
+	}
+	log.Println("[INFO] New Engine replica RANGE: ", engine.Start, " to", engine.End)
+}
+
 func (engine *Engine) setRecoveryStart() {
 	if engine.CurrentIndex != 0 {
 		engine.Start = engine.CurrentIndex - (engine.Failures * engine.PageSize)
