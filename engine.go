@@ -173,6 +173,24 @@ func (engine *Engine) Persist(jurisprudence Jurisprudence) {
 	engine.ResponseChannel <- http.StatusOK
 }
 
+//GetDocumentType - returns the document type.
+func (engine *Engine) GetDocumentType() string {
+	switch engine.Base {
+	case "baseAcordaos":
+		return "Acórdãos"
+	case "baseSumulas":
+		return "Súmulas"
+	case "baseSumulasVinculantes":
+		return "Súmulas Vinculantes"
+	case "basePresidencia":
+		return "Decisões da Presidência"
+	case "baseRepercussao":
+		return "Repercussão Geral"
+	default:
+		return "CUSTOM[" + engine.Base + "]"
+	}
+}
+
 func (engine *Engine) runAsSequential() {
 	engine.InitElastic()
 	if engine.ConnectedToIndex() {
