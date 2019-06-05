@@ -27,5 +27,7 @@ var EngineConfig = map[string]interface{}{
 
 //ControlConfig - Config the control behavior
 var ControlConfig = map[string]interface{}{
+	"isConcurrent":       strings.ToUpper(GetEnvString("CONTROL_IS_CONCURRENT", "FALSE")) == "TRUE",
 	"LastGoRoutineRange": -1,
+	"ActionDelay":        time.Duration(GetEnvInt("CONTROL_ACTION_DELAY", 25)),
 }

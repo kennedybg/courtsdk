@@ -1,6 +1,9 @@
 package courtsdk
 
-import "log"
+import (
+	"log"
+	"time"
+)
 
 // NewControl creates a new Control instance with default configuration.
 func NewControl(options ...func(*Control)) *Control {
@@ -29,4 +32,19 @@ func validateEngine(engine *Engine) (bool, string) {
 		return false, "[ENGINE] Failed an Engine must have a ENTRYPOINT defined."
 	}
 	return true, ""
+}
+
+//Start - Initialize all engines
+func (control *Control) Start() {
+	for _, engine := range control.Engines {
+		if ControlConfig["isConcurrent"].(bool) {
+			//TODO
+			log.Println(engine)
+		} else {
+			//TODO
+			log.Println(engine)
+		}
+		log.Println("[CONTROL] Awaiting to start next base. If there is a network error, there will be time to reconnect.")
+		time.Sleep(ControlConfig["ActionDelay"].(time.Duration) * time.Second)
+	}
 }
