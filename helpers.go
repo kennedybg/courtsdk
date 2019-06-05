@@ -62,3 +62,58 @@ func GetDefaultcollector() *colly.Collector {
 func GetNewContext() (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), EngineConfig["RequestTimeout"].(time.Duration)*time.Second)
 }
+
+//GetElasticMapping - returns the default Elasticsearch mapping
+func GetElasticMapping() string {
+	return `{
+		"settings": {
+			"index": {
+				"number_of_shards": 10,
+				"number_of_replicas": 0
+			}
+		},
+		"mappings": {
+			"_doc": {
+				"_all": {
+					"type": "text",
+					"index": "true",
+					"analyzer": "brazilian"
+				},
+				"properties": {
+					"court": {
+						"type": "text"
+					},
+					"document_type": {
+						"type": "keyword"
+					},
+					"document_id": {
+						"type": "keyword"
+					},
+					"is_enabled": {
+						"type": "boolean"
+					},
+					"checksum": {
+						"type": "text"
+					},
+					"full_document_link": {
+						"type": "text"
+					},
+					"content": {
+						"type": "text",
+						"index": "true",
+						"analyzer": "brazilian"
+					},
+					"judged_at": {
+						"type": "date"
+					},
+					"inserted_at": {
+						"type": "date"
+					},
+					"updated_at": {
+						"type": "date"
+					}
+				}
+			}
+		}
+	}`
+}

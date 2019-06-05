@@ -126,3 +126,31 @@ func (engine *Engine) pingElasticSearch(elasticFullURL string) {
 	}
 	log.Printf("[SUCCESS] Elasticsearch returned with code %d and version %s\n", code, info.Version.Number)
 }
+
+//ConnectedToIndex - Check if the given index exist.
+func (engine *Engine) ConnectedToIndex() bool {
+	index := ElasticConfig["Index"].(string)
+	context, cancelContext := GetNewContext()
+	defer cancelContext()
+	exists, err := engine.ElasticClient.IndexExists(index).Do(context)
+	if err != nil {
+		log.Println("[FAILED] Unable to connect to index -> ["+index+"]", err)
+		return false
+	}
+	if !exists {
+		log.Println("[WARNING] Index -> [" + index + "] not found. Attempting to create...")
+		createIndex, err := engine.ElasticClient.CreateIndex(index).BodyString(GetElasticMapping()).Do(context)
+		if err != nil {
+			log.Println("[FAILED] Create index -> ["+index+"].", err)
+			return false
+		}
+		if !createIndex.Acknowledged {
+			log.Println("[WARNING] Index -> [" + index + "] was created, but not acknowledged.")
+			return false
+		}
+		log.Println("[SUCCESS] Index -> [" + index + "] was created and acknowledged.")
+		return true
+	}
+	log.Println("[SUCCESS] Index -> [" + index + "] was found, sending data to it...")
+	return true
+}
