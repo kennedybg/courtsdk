@@ -1,10 +1,12 @@
 package courtsdk
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/debug"
@@ -54,4 +56,9 @@ func GetDefaultcollector() *colly.Collector {
 	transport.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
 	collector.WithTransport(transport)
 	return collector
+}
+
+//GetNewContext - return a new context with default timeout and context cancelation function.
+func GetNewContext() (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), EngineConfig["RequestTimeout"].(time.Duration)*time.Second)
 }
