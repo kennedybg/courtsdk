@@ -215,6 +215,28 @@ func (engine *Engine) runAsConcurrent() {
 	}
 }
 
+func (engine Engine) spawnEngine(activeEnginesChannel chan int, maxEnginesChannel chan int) {
+	engine.InitElastic()
+	if engine.ConnectedToIndex() {
+		engine.setRange()
+		for engine.Recoveries < EngineConfig["MaxRecoveries"].(int) {
+			engine.EntryPoint(&engine)
+			if engine.Done {
+				engine.logSuccess()
+				activeEnginesChannel <- -1
+				return
+			}
+			engine.logFailure()
+			engine.setRecoveryStart()
+			time.Sleep(ControlConfig["ActionDelay"].(time.Duration) * time.Second)
+			engine.Failures = 0
+			engine.Recoveries++
+		}
+		maxEnginesChannel <- -1
+	}
+	activeEnginesChannel <- -1
+}
+
 //SetRange - set a valid range for an engine
 func (engine *Engine) setRange() {
 	lastRange := ControlConfig["LastGoRoutineRange"].(int)
