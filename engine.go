@@ -1,7 +1,10 @@
 package courtsdk
 
 import (
+	"log"
+	"strconv"
 	"sync"
+	"time"
 
 	"github.com/gocolly/colly"
 	"github.com/olivere/elastic"
@@ -93,4 +96,33 @@ func Lock(lock *sync.WaitGroup) func(*Engine) {
 	return func(engine *Engine) {
 		engine.Lock = lock
 	}
+}
+
+//InitElastic - Initialize an Elasticsearch client with Elastic configs.
+func (engine *Engine) InitElastic() {
+	var err error
+	elasticFullURL := ElasticConfig["URL"].(string) + ":" + strconv.Itoa(ElasticConfig["Port"].(int))
+	engine.ElasticClient, err = elastic.NewClient(elastic.SetSniff(false), elastic.SetURL(elasticFullURL))
+	if err != nil {
+		log.Println("[FAILED] Connect to Elasticsearch.", err)
+		log.Println("[WARNING] Retrying in ", strconv.Itoa(ElasticConfig["RetryConnectionDelay"].(int)), " seconds...")
+		time.Sleep(time.Duration(ElasticConfig["RetryConnectionDelay"].(int)) * time.Second)
+		engine.InitElastic()
+		return
+	}
+	engine.pingElasticSearch(elasticFullURL)
+}
+
+func (engine *Engine) pingElasticSearch(elasticFullURL string) {
+	context, cancelContext := GetNewContext()
+	defer cancelContext()
+	info, code, err := engine.ElasticClient.Ping(elasticFullURL).Do(context)
+	if err != nil {
+		log.Println("[FAILED] Ping to Elasticsearch.", err)
+		log.Println("[WARNING] Retrying in ", strconv.Itoa(ElasticConfig["RetryPingDelay"].(int)), " seconds...")
+		time.Sleep(time.Duration(ElasticConfig["RetryPingDelay"].(int)) * time.Second)
+		engine.InitElastic()
+		return
+	}
+	log.Printf("[SUCCESS] Elasticsearch returned with code %d and version %s\n", code, info.Version.Number)
 }
