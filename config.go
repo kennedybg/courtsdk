@@ -5,6 +5,15 @@ import (
 	"time"
 )
 
+//ElasticConfig - config
+var ElasticConfig = map[string]interface{}{
+	"URL":                  GetEnvString("ELASTIC_URL", "http://localhost"),
+	"Port":                 GetEnvInt("ELASTIC_PORT", 9200),
+	"Index":                GetEnvString("ELASTIC_INDEX", "jurisprudences_dev"),
+	"RetryConnectionDelay": GetEnvInt("ELASTIC_RETRY_CONNECTION_DELAY", 10),
+	"RetryPingDelay":       GetEnvInt("ELASTIC_RETRY_PING_DELAY", 5),
+}
+
 //EngineConfig - Config engine behavior
 var EngineConfig = map[string]interface{}{
 	"isAsync":             strings.ToUpper(GetEnvString("ENGINE_IS_ASYNC", "TRUE")) == "TRUE",
