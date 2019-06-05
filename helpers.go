@@ -2,8 +2,12 @@ package courtsdk
 
 import (
 	"log"
+	"net/http"
 	"os"
 	"strconv"
+
+	"github.com/gocolly/colly"
+	"github.com/gocolly/colly/debug"
 )
 
 //DebugEnv returns if the current env is safe to debug.
@@ -37,4 +41,17 @@ func GetEnvString(envVar string, Default string) string {
 		return Default
 	}
 	return str
+}
+
+//GetDefaultcollector - return the default collector (colly)
+func GetDefaultcollector() *colly.Collector {
+	collector := colly.NewCollector(colly.Async(EngineConfig["isAsync"].(bool)))
+	if DebugEnv() {
+		collector = colly.NewCollector(colly.Async(EngineConfig["isAsync"].(bool)),
+			colly.Debugger(&debug.LogDebugger{}))
+	}
+	transport := &http.Transport{}
+	transport.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+	collector.WithTransport(transport)
+	return collector
 }
