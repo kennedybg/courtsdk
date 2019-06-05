@@ -195,10 +195,22 @@ func (engine *Engine) runAsSequential() {
 func (engine *Engine) runAsConcurrent() {
 	activeEngines := 0
 	maxEngines := ControlConfig["MaxConcurrentEngines"].(int)
-
+	activeEnginesChannel := make(chan int)
+	maxEnginesChannel := make(chan int)
 	for {
 		if activeEngines == 0 && maxEngines == 0 {
 			return
+		}
+		select {
+		case value := <-activeEnginesChannel:
+			activeEngines += value
+		case value := <-maxEnginesChannel:
+			maxEngines += value
+		default:
+			if activeEngines < maxEngines {
+				activeEngines++
+				//Go run engine...
+			}
 		}
 	}
 }
