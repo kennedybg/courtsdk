@@ -180,7 +180,35 @@ func (engine *Engine) runAsSequential() {
 		engine.Recoveries = 0
 		for engine.Recoveries < EngineConfig["MaxRecoveries"].(int) {
 			engine.EntryPoint(engine)
-
+			if engine.Done {
+				engine.logSuccess()
+				return
+			}
+			engine.logFailure()
+			engine.setRecoveryStart()
+			time.Sleep(ControlConfig["ActionDelay"].(time.Duration) * time.Second)
+			engine.Failures = 0
+			engine.Recoveries++
 		}
 	}
+}
+
+func (engine *Engine) setRecoveryStart() {
+	if engine.CurrentIndex != 0 {
+		engine.Start = engine.CurrentIndex - (engine.Failures * engine.PageSize)
+	}
+}
+
+func (engine Engine) logSuccess() {
+	str := "[ENGINE] COURT -> " + engine.Court
+	str += " BASE -> " + engine.Base + " ended successfully."
+	log.Println(str)
+}
+
+func (engine Engine) logFailure() {
+	str := "[ENGINE] COURT -> " + engine.Court
+	str += " BASE -> " + engine.Base + " " + strconv.Itoa(EngineConfig["MaxFailures"].(int)) + " times."
+	str += " Last ID requested: " + strconv.Itoa(engine.CurrentIndex)
+	str += " Trying to recover from index -> " + strconv.Itoa(engine.Start)
+	log.Println(str)
 }
