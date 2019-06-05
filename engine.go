@@ -2,6 +2,7 @@ package courtsdk
 
 import (
 	"log"
+	"net/http"
 	"strconv"
 	"sync"
 	"time"
@@ -153,4 +154,22 @@ func (engine *Engine) ConnectedToIndex() bool {
 	}
 	log.Println("[SUCCESS] Index -> [" + index + "] was found, sending data to it...")
 	return true
+}
+
+//Persist - send data to Elasticsearch.
+func (engine *Engine) Persist(jurisprudence Jurisprudence) {
+	uid := jurisprudence.Court + "-" + engine.Base + "-" + jurisprudence.DocumentID
+	context, cancelContext := GetNewContext()
+	defer cancelContext()
+	_, err := engine.ElasticClient.Index().
+		Index(ElasticConfig["Index"].(string)).
+		Type("_doc").
+		Id(uid).
+		BodyJson(jurisprudence).
+		Do(context)
+	if err != nil {
+		log.Println("[FAILED][CREATE] Save document ["+jurisprudence.DocumentID+"]["+jurisprudence.DocumentType+"]:", err)
+		engine.ResponseChannel <- http.StatusInternalServerError
+	}
+	engine.ResponseChannel <- http.StatusOK
 }
