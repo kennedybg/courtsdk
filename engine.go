@@ -16,7 +16,6 @@ func NewEngine(options ...func(*Engine)) *Engine {
 	engine := &Engine{}
 	engine.Collector = GetDefaultcollector()
 	engine.ResponseChannel = make(chan int)
-	engine.Done = false
 	engine.PageSize = 1
 	var wg sync.WaitGroup
 	engine.Lock = &wg
