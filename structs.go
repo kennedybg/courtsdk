@@ -2,6 +2,7 @@ package courtsdk
 
 import (
 	"sync"
+	"time"
 
 	"github.com/gocolly/colly"
 	"github.com/olivere/elastic"
@@ -23,4 +24,18 @@ type Engine struct {
 	Collector       *colly.Collector
 	ElasticClient   *elastic.Client
 	Lock            *sync.WaitGroup
+}
+
+//Jurisprudence is a structure used for serializing/deserializing data in Elasticsearch.
+type Jurisprudence struct {
+	Court            string    `json:"court"`
+	DocumentType     string    `json:"document_type"`
+	DocumentID       string    `json:"document_id"`
+	IsEnabled        bool      `json:"is_enabled"`
+	Checksum         string    `json:"checksum"`
+	FullDocumentLink string    `json:"full_document_link"`
+	Content          string    `json:"content"`
+	JudgedAt         time.Time `json:"judged_at"`
+	CreatedAt        time.Time `json:"inserted_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
 }
