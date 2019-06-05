@@ -1,11 +1,7 @@
 package courtsdk
 
 import (
-	"context"
-	"crypto/md5"
-	"encoding/hex"
 	"log"
-	"net/http"
 	"os"
 	"strconv"
 )
