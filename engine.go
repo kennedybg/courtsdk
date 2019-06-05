@@ -192,6 +192,17 @@ func (engine *Engine) runAsSequential() {
 	}
 }
 
+func (engine *Engine) runAsConcurrent() {
+	activeEngines := 0
+	maxEngines := ControlConfig["MaxConcurrentEngines"].(int)
+
+	for {
+		if activeEngines == 0 && maxEngines == 0 {
+			return
+		}
+	}
+}
+
 func (engine *Engine) setRecoveryStart() {
 	if engine.CurrentIndex != 0 {
 		engine.Start = engine.CurrentIndex - (engine.Failures * engine.PageSize)
