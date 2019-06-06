@@ -226,6 +226,7 @@ func (engine *Engine) runAsConcurrent() {
 	maxEngines := engine.MaxReplicas
 	activeEnginesChannel := make(chan int)
 	maxEnginesChannel := make(chan int)
+	elasticMutex := sync.Mutex{}
 	for {
 		if activeEngines == 0 && maxEngines == 0 {
 			return
@@ -237,17 +238,19 @@ func (engine *Engine) runAsConcurrent() {
 			maxEngines += value
 		default:
 			if activeEngines < maxEngines {
-				time.Sleep(500 * time.Millisecond)
 				activeEngines++
-				go engine.spawnEngine(activeEnginesChannel, maxEnginesChannel)
+				go engine.spawnEngine(activeEnginesChannel, maxEnginesChannel, &elasticMutex)
 			}
 		}
 	}
 }
 
-func (engine Engine) spawnEngine(activeEnginesChannel chan int, maxEnginesChannel chan int) {
+func (engine Engine) spawnEngine(activeEnginesChannel chan int, maxEnginesChannel chan int, elasticMutex *sync.Mutex) {
 	engine.InitElastic()
-	if engine.ConnectedToIndex() {
+	elasticMutex.Lock()
+	connectedToIndex := engine.ConnectedToIndex()
+	elasticMutex.Unlock()
+	if connectedToIndex {
 		engine.setRange()
 		for engine.Recoveries < EngineConfig["MaxRecoveries"].(int) {
 			engine.EntryPoint(&engine)
