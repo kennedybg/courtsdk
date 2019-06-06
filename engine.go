@@ -237,6 +237,7 @@ func (engine *Engine) runAsConcurrent() {
 			maxEngines += value
 		default:
 			if activeEngines < maxEngines {
+				time.Sleep(500 * time.Millisecond)
 				activeEngines++
 				go engine.spawnEngine(activeEnginesChannel, maxEnginesChannel)
 			}
