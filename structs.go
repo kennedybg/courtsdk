@@ -19,6 +19,9 @@ type Engine struct {
 	CurrentIndex    int
 	Recoveries      int
 	Done            bool
+	IsConcurrent    bool
+	MaxReplicas     int
+	ReplicaRange    int
 	EntryPoint      func(engine *Engine)
 	ResponseChannel chan int
 	Collector       *colly.Collector

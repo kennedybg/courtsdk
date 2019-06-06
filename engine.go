@@ -41,18 +41,18 @@ func Base(base string) func(*Engine) {
 
 // Start set the start index
 func Start(start int) func(*Engine) {
-	return func(eng *Engine) {
-		if ControlConfig["IsConcurrent"].(bool) {
+	return func(engine *Engine) {
+		if engine.IsConcurrent {
 			ControlConfig["LastGoRoutineRange"] = start - 1
 		}
-		eng.Start = start
+		engine.Start = start
 	}
 }
 
 // End set the end index
 func End(end int) func(*Engine) {
-	return func(eng *Engine) {
-		eng.End = end
+	return func(engine *Engine) {
+		engine.End = end
 	}
 }
 
@@ -95,6 +95,17 @@ func ResponseChannel(responseChannel chan int) func(*Engine) {
 func Lock(lock *sync.WaitGroup) func(*Engine) {
 	return func(engine *Engine) {
 		engine.Lock = lock
+	}
+}
+
+// Concurrency set how many replicas and range (both greater than zero).
+func Concurrency(maxReplicas int, replicaRange int) func(*Engine) {
+	return func(engine *Engine) {
+		if maxReplicas > 0 && replicaRange > 0 {
+			engine.IsConcurrent = true
+			engine.MaxReplicas = maxReplicas
+			engine.ReplicaRange = replicaRange
+		}
 	}
 }
 
@@ -212,7 +223,7 @@ func (engine *Engine) runAsSequential() {
 
 func (engine *Engine) runAsConcurrent() {
 	activeEngines := 0
-	maxEngines := ControlConfig["MaxConcurrentEngines"].(int)
+	maxEngines := engine.MaxReplicas
 	activeEnginesChannel := make(chan int)
 	maxEnginesChannel := make(chan int)
 	for {
@@ -259,7 +270,7 @@ func (engine Engine) spawnEngine(activeEnginesChannel chan int, maxEnginesChanne
 func (engine *Engine) setRange() {
 	lastRange := ControlConfig["LastGoRoutineRange"].(int)
 	engine.Start = lastRange + 1
-	engine.End = lastRange + EngineConfig["GoRoutineRange"].(int)
+	engine.End = lastRange + engine.ReplicaRange
 	if lastRange < engine.End {
 		ControlConfig["LastGoRoutineRange"] = engine.End
 	}
