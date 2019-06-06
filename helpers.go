@@ -9,21 +9,21 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/debug"
 )
 
-//DebugEnv returns if the current env is safe to debug.
-func DebugEnv() bool {
-	env := os.Getenv("environment")
-	return env != "prod" && env != "stg"
+//Debug returns if the current env is safe to debug.
+func Debug() bool {
+	return strings.ToUpper(os.Getenv("DEBUG")) == "TRUE"
 }
 
 //DebugPrint - log only in dev environment.
 func DebugPrint(v ...interface{}) {
-	if DebugEnv() {
+	if Debug() {
 		log.Println(v...)
 	}
 }
@@ -51,7 +51,7 @@ func GetEnvString(envVar string, Default string) string {
 //GetDefaultcollector - return the default collector (colly)
 func GetDefaultcollector() *colly.Collector {
 	collector := colly.NewCollector(colly.Async(EngineConfig["IsAsync"].(bool)))
-	if DebugEnv() {
+	if Debug() {
 		collector = colly.NewCollector(colly.Async(EngineConfig["IsAsync"].(bool)),
 			colly.Debugger(&debug.LogDebugger{}))
 	}
