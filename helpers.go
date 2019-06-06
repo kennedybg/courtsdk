@@ -17,13 +17,13 @@ import (
 )
 
 //Debug returns if the current env is safe to debug.
-func Debug() bool {
-	return strings.ToUpper(os.Getenv("DEBUG")) == "TRUE"
+func Debug() string {
+	return strings.ToUpper(os.Getenv("DEBUG"))
 }
 
 //DebugPrint - log only in dev environment.
 func DebugPrint(v ...interface{}) {
-	if Debug() {
+	if Debug() == "CONFIG" || Debug() == "ALL" {
 		log.Println(v...)
 	}
 }
@@ -51,7 +51,7 @@ func GetEnvString(envVar string, Default string) string {
 //GetDefaultcollector - return the default collector (colly)
 func GetDefaultcollector() *colly.Collector {
 	collector := colly.NewCollector(colly.Async(EngineConfig["IsAsync"].(bool)))
-	if Debug() {
+	if Debug() == "REQUEST" || Debug() == "ALL" {
 		collector = colly.NewCollector(colly.Async(EngineConfig["IsAsync"].(bool)),
 			colly.Debugger(&debug.LogDebugger{}))
 	}
