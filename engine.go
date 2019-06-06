@@ -197,6 +197,8 @@ func (engine *Engine) GetDocumentType() string {
 		return "Decisões da Presidência"
 	case "baseRepercussao":
 		return "Repercussão Geral"
+	case "basePrecedentes":
+		return "Precedentes Normativos"
 	default:
 		return "CUSTOM[" + engine.Base + "]"
 	}
