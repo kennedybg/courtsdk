@@ -2,7 +2,7 @@
 
 Para começar, importe este SDK para sua aplicação:
 
-```
+```Go
 import "gitlab.com/equipe-ninja/BaaS/courtsdk"
 ```
 
@@ -12,7 +12,7 @@ A estrutura [Control](../structs.go) é responsável guardar todas as Engines re
 
 Após importar o SDK para sua aplicação, é necessário criar um estrutura de controle:
 
-```
+```Go
 package main
 
 import (
@@ -30,7 +30,7 @@ A estrutura [Engine](../structs.go) representa um programa do tipo Crawler/Scrap
 
 Após criarmos um Control, agora precisamos criar pelo menos uma Engine:
 
-```
+```Go
 package main
 
 import (
@@ -59,7 +59,7 @@ Uma Engine possui várias configurações, porém apenas as três acima são obr
 
 **Exemplos:**
 
-```
+```Go
 courtsdk.Court("TST"),
 courtsdk.Base("basePrecedentes"),
 courtsdk.EntryPoint(precedentesNormativosEngine),
@@ -75,7 +75,7 @@ Resultará em documentos com padrão de ID:
 * **TST-basePrecedentes-3**
 
 
-```
+```Go
 courtsdk.Court("STF"),
 courtsdk.Base("baseSumulas"),
 courtsdk.EntryPoint(funcaoSumulas),
@@ -88,7 +88,7 @@ Resultará em documentos com padrão de ID:
 
 * **STF-baseSumulas-3**
 
-```
+```Go
 courtsdk.Court("STJ"),
 courtsdk.Base("baseAcordaos"),
 courtsdk.EntryPoint(acordaosCrawler),
@@ -110,7 +110,7 @@ Em todos os exemplos acima, a função definida como EntryPoint da engine, será
 
 Após criarmos nossa Engine, devemos registra-lá na estrutura de controle para que ela possa ser executada:
 
-```
+```Go
 package main
 
 import (
@@ -134,7 +134,7 @@ Dessa forma, a Engine "minhaEngine" agora está no array de Engines da estrutura
 
 Após definir todas as Engines necessárias, basta iniciar o controle:
 
-```
+```Go
 package main
 
 import (
