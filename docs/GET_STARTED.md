@@ -8,13 +8,7 @@ import "gitlab.com/equipe-ninja/BaaS/courtsdk"
 
 # Control
 
-A estrutura [Control](../control.go) é responsável guardar todas as Engines registradas. Possui também métodos para executar cada Engine.
-
-```
-type Control struct {
-	Engines []Engine
-}
-```
+A estrutura [Control](../structs.go) é responsável guardar todas as Engines registradas. Possui também [métodos](../control.go) para executar cada Engine.
 
 Após importar o SDK para sua aplicação, é necessário criar um estrutura de controle:
 
@@ -32,7 +26,7 @@ func main() {
 
 # Engine
 
-A estrutura [Engine](../engine.go) representa um programa do tipo Crawler/Scraper. Implementa métodos para inicialização, configuração e comunicação com o Elasticsearch (detalhes na página Engine).
+A estrutura [Engine](../structs.go) representa um programa do tipo Crawler/Scraper. Implementa [métodos](../engine.go) para inicialização, configuração e comunicação com o Elasticsearch (detalhes na página Engine).
 
 Após criarmos um Control, agora precisamos criar pelo menos uma Engine:
 
@@ -53,13 +47,17 @@ func main() {
 }
 ```
 
-Uma Engine possui várias configurações, porém apenas as três acima são obrigatórias.
+Uma Engine possui várias configurações, porém apenas as três acima são obrigatórias:
 
-**COURT** = Nome do tribunal, será usado para compor o ID do documento no Elasticsearch.
-**BASE** = Nome da base de documentos, será usado para gerar o ID do documento e o DocumentType no Elasticsearch.
-**ENTRYPOINT** = Função de entrada para determinada Engine, é o que será executado quando o controle iniciar a Engine.
 
-Exemplos:
+* **COURT** = Nome do tribunal, será usado para compor o ID do documento no Elasticsearch.
+
+* **BASE** = Nome da base de documentos, será usado para gerar o ID do documento e o DocumentType no Elasticsearch.
+
+* **ENTRYPOINT** = Função de entrada para determinada Engine, é o que será executado quando o controle iniciar a Engine.
+
+
+**Exemplos:**
 
 ```
 courtsdk.Court("TST"),
@@ -67,14 +65,28 @@ courtsdk.Base("basePrecedentes"),
 courtsdk.EntryPoint(precedentesNormativosEngine),
 ```
 
-Resultará em documentos com padrão de ID: **TST-basePrecedentes-1, TST-basePrecedentes-2, TST-basePrecedentes-3** etc.
+Resultará em documentos com padrão de ID:
+
+
+* **TST-basePrecedentes-1**
+
+* **TST-basePrecedentes-2**
+
+* **TST-basePrecedentes-3**
+
 
 ```
 courtsdk.Court("STF"),
 courtsdk.Base("baseSumulas"),
 courtsdk.EntryPoint(funcaoSumulas),
 ```
-Resultará em documentos com padrão de ID: **STF-baseSumulas-1, STF-baseSumulas-2, STF-baseSumulas-3** etc.
+Resultará em documentos com padrão de ID:
+
+* **STF-baseSumulas-1**
+
+* **STF-baseSumulas-2**
+
+* **STF-baseSumulas-3**
 
 ```
 courtsdk.Court("STJ"),
@@ -82,7 +94,13 @@ courtsdk.Base("baseAcordaos"),
 courtsdk.EntryPoint(acordaosCrawler),
 ```
 
-Resultará em documentos com padrão de ID: **STJ-baseAcordaos-1, STJ-baseAcordaos-2, STJ-baseAcordaos-3** etc.
+Resultará em documentos com padrão de ID:
+
+* **STJ-baseAcordaos-1**
+
+* **STJ-baseAcordaos-2**
+
+* **STJ-baseAcordaos-3**
 
 Em todos os exemplos acima, a função definida como EntryPoint da engine, será a responsável por coletar as informações, o SDK apenas gerencia as execuções e recuperações.
 
