@@ -38,11 +38,11 @@ import (
 )
 
 func main() {
-	control := courtsdk.NewControl()
+    control := courtsdk.NewControl()
     minhaEngine := courtsdk.NewEngine(
         courtsdk.Court("TRIBUNAL_EXEMPLO"),
-		courtsdk.Base("BASE_DOCUMENTOS_EXEMPLO"),
-		courtsdk.EntryPoint(MINHA_FUNCAO_ENGINE),
+        courtsdk.Base("BASE_DOCUMENTOS_EXEMPLO"),
+        courtsdk.EntryPoint(MINHA_FUNCAO_ENGINE),
     )
 }
 ```
@@ -118,11 +118,11 @@ import (
 )
 
 func main() {
-	control := courtsdk.NewControl()
+    control := courtsdk.NewControl()
     minhaEngine := courtsdk.NewEngine(
         courtsdk.Court("TRIBUNAL_EXEMPLO"),
-		courtsdk.Base("BASE_DOCUMENTOS_EXEMPLO"),
-		courtsdk.EntryPoint(MINHA_FUNCAO_ENGINE),
+        courtsdk.Base("BASE_DOCUMENTOS_EXEMPLO"),
+        courtsdk.EntryPoint(MINHA_FUNCAO_ENGINE),
     )
     control.Register(minhaEngine)
 }
@@ -142,11 +142,11 @@ import (
 )
 
 func main() {
-	control := courtsdk.NewControl()
+    control := courtsdk.NewControl()
     minhaEngine := courtsdk.NewEngine(
         courtsdk.Court("TRIBUNAL_EXEMPLO"),
-		courtsdk.Base("BASE_DOCUMENTOS_EXEMPLO"),
-		courtsdk.EntryPoint(MINHA_FUNCAO_ENGINE),
+        courtsdk.Base("BASE_DOCUMENTOS_EXEMPLO"),
+        courtsdk.EntryPoint(MINHA_FUNCAO_ENGINE),
     )
     control.Register(minhaEngine)
     control.Start()
