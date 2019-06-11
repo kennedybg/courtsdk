@@ -113,7 +113,7 @@ func Concurrency(maxReplicas int, replicaRange int) func(*Engine) {
 func (engine *Engine) InitElastic() {
 	var err error
 	elasticFullURL := ElasticConfig["URL"].(string) + ":" + strconv.Itoa(ElasticConfig["Port"].(int))
-	engine.ElasticClient, err = elastic.NewClient(elastic.SetSniff(false), elastic.SetURL(elasticFullURL))
+	engine.ElasticClient, err = elastic.NewClient(elastic.SetSniff(true), elastic.SetURL(elasticFullURL))
 	if err != nil {
 		log.Println("[FAILED] Connect to Elasticsearch.", err)
 		log.Println("[WARNING] Retrying in ", strconv.Itoa(ElasticConfig["RetryConnectionDelay"].(int)), " seconds...")
@@ -253,7 +253,7 @@ func (engine Engine) spawnEngine(activeEnginesChannel chan int, maxEnginesChanne
 	connectedToIndex := engine.ConnectedToIndex()
 	elasticMutex.Unlock()
 	if connectedToIndex {
-		engine.setRange()
+		engine.setRange(elasticMutex)
 		for engine.Recoveries < EngineConfig["MaxRecoveries"].(int) {
 			engine.EntryPoint(&engine)
 			if engine.Done {
@@ -273,12 +273,14 @@ func (engine Engine) spawnEngine(activeEnginesChannel chan int, maxEnginesChanne
 }
 
 //SetRange - set a valid range for an engine
-func (engine *Engine) setRange() {
+func (engine *Engine) setRange(elasticMutex *sync.Mutex) {
 	lastRange := ControlConfig["LastGoRoutineRange"].(int)
 	engine.Start = lastRange + 1
 	engine.End = lastRange + engine.ReplicaRange
 	if lastRange < engine.End {
+		elasticMutex.Lock()
 		ControlConfig["LastGoRoutineRange"] = engine.End
+		elasticMutex.Unlock()
 	}
 	log.Println("[INFO] New Engine replica RANGE: ", engine.Start, " to", engine.End)
 }
