@@ -37,7 +37,7 @@ func validateEngine(engine *Engine) (bool, string) {
 //Start - Initialize all engines
 func (control *Control) Start() {
 	for _, engine := range control.Engines {
-		engine.Setup()
+		engine.doSetup()
 		if engine.IsConcurrent {
 			engine.runAsConcurrent()
 		} else {

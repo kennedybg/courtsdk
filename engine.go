@@ -311,3 +311,11 @@ func (engine Engine) logFailure() {
 	str += " Trying to recover from index -> " + strconv.Itoa(engine.Start)
 	log.Println(str)
 }
+
+func (engine Engine) doSetup() {
+	if engine.Setup == nil {
+		DebugPrint("[ENGINE] COURT -> " + engine.Court + " BASE -> " + engine.Base + " has no Setup function.")
+		return
+	}
+	engine.Setup()
+}
