@@ -77,6 +77,13 @@ func ElasticClient(client *elastic.Client) func(*Engine) {
 	}
 }
 
+// Setup is executed once before the engine entrypoint.
+func Setup(setup func()) func(*Engine) {
+	return func(engine *Engine) {
+		engine.Setup = setup
+	}
+}
+
 // EntryPoint set a function to start the engine.
 func EntryPoint(entry func(engine *Engine)) func(*Engine) {
 	return func(engine *Engine) {
