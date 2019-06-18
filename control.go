@@ -37,12 +37,13 @@ func validateEngine(engine *Engine) (bool, string) {
 //Start - Initialize all engines
 func (control *Control) Start() {
 	for _, engine := range control.Engines {
-		ResetConfigsToDefault()
+		engine.doSetup()
 		if engine.IsConcurrent {
 			engine.runAsConcurrent()
 		} else {
 			engine.runAsSequential()
 		}
+		ResetConfigsToDefault()
 		log.Println("[CONTROL] Awaiting to start next base. If there is a network error, there will be time to reconnect.")
 		time.Sleep(ControlConfig["ActionDelay"].(time.Duration) * time.Second)
 	}

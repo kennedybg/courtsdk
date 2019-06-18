@@ -22,6 +22,7 @@ type Engine struct {
 	IsConcurrent    bool
 	MaxReplicas     int
 	ReplicaRange    int
+	Setup           func()
 	EntryPoint      func(engine *Engine)
 	ResponseChannel chan int
 	Collector       *colly.Collector

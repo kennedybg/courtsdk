@@ -77,6 +77,13 @@ func ElasticClient(client *elastic.Client) func(*Engine) {
 	}
 }
 
+// Setup is executed once before the engine entrypoint.
+func Setup(setup func()) func(*Engine) {
+	return func(engine *Engine) {
+		engine.Setup = setup
+	}
+}
+
 // EntryPoint set a function to start the engine.
 func EntryPoint(entry func(engine *Engine)) func(*Engine) {
 	return func(engine *Engine) {
@@ -303,4 +310,12 @@ func (engine Engine) logFailure() {
 	str += " Last ID requested: " + strconv.Itoa(engine.CurrentIndex)
 	str += " Trying to recover from index -> " + strconv.Itoa(engine.Start)
 	log.Println(str)
+}
+
+func (engine Engine) doSetup() {
+	if engine.Setup == nil {
+		DebugPrint("[ENGINE] COURT -> " + engine.Court + " BASE -> " + engine.Base + " has no Setup function.")
+		return
+	}
+	engine.Setup()
 }
