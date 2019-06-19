@@ -256,6 +256,7 @@ func (engine *Engine) runAsConcurrent() {
 
 func (engine Engine) spawnEngine(activeEnginesChannel chan int, maxEnginesChannel chan int, elasticMutex *sync.Mutex) {
 	engine.InitElastic()
+	engine.Collector = GetDefaultcollector()
 	elasticMutex.Lock()
 	connectedToIndex := engine.ConnectedToIndex()
 	elasticMutex.Unlock()
