@@ -120,7 +120,7 @@ func Concurrency(maxReplicas int, replicaRange int) func(*Engine) {
 func (engine *Engine) InitElastic() {
 	var err error
 	elasticFullURL := ElasticConfig["URL"].(string) + ":" + strconv.Itoa(ElasticConfig["Port"].(int))
-	engine.ElasticClient, err = elastic.NewClient(elastic.SetSniff(true), elastic.SetURL(elasticFullURL))
+	engine.ElasticClient, err = elastic.NewClient(elastic.SetSniff(false), elastic.SetURL(elasticFullURL))
 	if err != nil {
 		log.Println("[FAILED] Connect to Elasticsearch.", err)
 		log.Println("[WARNING] Retrying in ", strconv.Itoa(ElasticConfig["RetryConnectionDelay"].(int)), " seconds...")
