@@ -58,9 +58,13 @@ var EngineConfig = getDefaultEngineConfig()
 //ControlConfig - Config the control behavior
 var ControlConfig = getDefaultControlConfig()
 
+//EngineMaxFailures = create a copy of engine config max failures.
+var EngineMaxFailures = EngineConfig["MaxFailures"].(int)
+
 //ResetConfigsToDefault use to reset all configs to the default values.
 func ResetConfigsToDefault() {
 	ElasticConfig = getDefaultElasticConfig()
 	EngineConfig = getDefaultEngineConfig()
 	ControlConfig = getDefaultControlConfig()
+	EngineMaxFailures = EngineConfig["MaxFailures"].(int)
 }

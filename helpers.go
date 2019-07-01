@@ -88,10 +88,7 @@ func RemoveUnusedChars(data string) string {
 
 //HasMaxFailures check if reached the max failures
 func HasMaxFailures(failures *int) bool {
-	ConfigMutex.Lock()
-	hasMaxFailures := *failures >= EngineConfig["MaxFailures"].(int)
-	ConfigMutex.Unlock()
-	return hasMaxFailures
+	return *failures >= EngineMaxFailures
 }
 
 //GetElasticMapping - returns the default Elasticsearch mapping
