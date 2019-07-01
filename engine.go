@@ -231,7 +231,7 @@ func (engine *Engine) runAsSequential() {
 	engine.InitElastic()
 	if engine.ConnectedToIndex() {
 		engine.Recoveries = 0
-		for engine.Recoveries < EngineConfig["MaxRecoveries"].(int) {
+		for engine.Recoveries < engine.MaxRecoveries {
 			engine.EntryPoint(engine)
 			if engine.Done {
 				engine.logSuccess()
@@ -278,7 +278,7 @@ func (engine Engine) spawnEngine(activeEnginesChannel chan int, maxEnginesChanne
 	elasticMutex.Unlock()
 	if connectedToIndex {
 		engine.setRange(elasticMutex)
-		for engine.Recoveries < EngineConfig["MaxRecoveries"].(int) {
+		for engine.Recoveries < engine.MaxRecoveries {
 			engine.EntryPoint(&engine)
 			if engine.Done {
 				engine.logSuccess()
@@ -323,7 +323,7 @@ func (engine Engine) logSuccess() {
 
 func (engine Engine) logFailure() {
 	str := "[ENGINE] COURT -> " + engine.Court
-	str += " BASE -> " + engine.Base + " " + strconv.Itoa(EngineConfig["MaxFailures"].(int)) + " times."
+	str += " BASE -> " + engine.Base + " " + strconv.Itoa(engine.MaxRecoveries) + " times."
 	str += " Last ID requested: " + strconv.Itoa(engine.CurrentIndex)
 	str += " Trying to recover from index -> " + strconv.Itoa(engine.Start)
 	log.Println(str)
