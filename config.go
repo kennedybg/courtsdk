@@ -2,21 +2,28 @@ package courtsdk
 
 import (
 	"strings"
+	"sync"
 	"time"
 )
 
+var configMutex sync.Mutex
+
 func getDefaultElasticConfig() map[string]interface{} {
-	return map[string]interface{}{
+	configMutex.Lock()
+	config := map[string]interface{}{
 		"URL":                  GetEnvString("ELASTIC_URL", "http://localhost"),
 		"Port":                 GetEnvInt("ELASTIC_PORT", 9200),
 		"Index":                GetEnvString("ELASTIC_INDEX", "jurisprudences_dev"),
 		"RetryConnectionDelay": GetEnvInt("ELASTIC_RETRY_CONNECTION_DELAY", 10),
 		"RetryPingDelay":       GetEnvInt("ELASTIC_RETRY_PING_DELAY", 5),
 	}
+	configMutex.Unlock()
+	return config
 }
 
 func getDefaultEngineConfig() map[string]interface{} {
-	return map[string]interface{}{
+	configMutex.Lock()
+	config := map[string]interface{}{
 		"IsAsync":             strings.ToUpper(GetEnvString("ENGINE_IS_ASYNC", "TRUE")) == "TRUE",
 		"MaxFailures":         GetEnvInt("ENGINE_MAX_FAILURES", 25),
 		"RequestsPerInterval": GetEnvInt("ENGINE_REQUESTS_PER_INTERVAL", 10),
@@ -25,15 +32,20 @@ func getDefaultEngineConfig() map[string]interface{} {
 		"GoRoutineRange":      GetEnvInt("ENGINE_GOROUTINE_RANGE", 200),
 		"MaxRecoveries":       GetEnvInt("ENGINE_MAX_RECOVERIES", 5),
 	}
+	configMutex.Unlock()
+	return config
 }
 
 func getDefaultControlConfig() map[string]interface{} {
-	return map[string]interface{}{
+	configMutex.Lock()
+	config := map[string]interface{}{
 		"IsConcurrent":         strings.ToUpper(GetEnvString("CONTROL_IS_CONCURRENT", "FALSE")) == "TRUE",
 		"MaxConcurrentEngines": GetEnvInt("CONTROL_MAX_CONCURRENT_ENGINES", 2),
 		"LastGoRoutineRange":   -1,
 		"ActionDelay":          time.Duration(GetEnvInt("CONTROL_ACTION_DELAY", 25)),
 	}
+	configMutex.Unlock()
+	return config
 }
 
 //ElasticConfig - config
@@ -47,7 +59,9 @@ var ControlConfig = getDefaultControlConfig()
 
 //ResetConfigsToDefault use to reset all configs to the default values.
 func ResetConfigsToDefault() {
+	configMutex.Lock()
 	ElasticConfig = getDefaultElasticConfig()
 	EngineConfig = getDefaultEngineConfig()
 	ControlConfig = getDefaultControlConfig()
+	configMutex.Unlock()
 }
