@@ -17,6 +17,8 @@ func NewEngine(options ...func(*Engine)) *Engine {
 	engine.Collector = GetDefaultcollector()
 	engine.ResponseChannel = make(chan int)
 	engine.PageSize = 1
+	engine.MaxFailures = 25
+	engine.MaxRecoveries = 5
 	var wg sync.WaitGroup
 	engine.Lock = &wg
 	for _, attr := range options {
@@ -60,6 +62,20 @@ func End(end int) func(*Engine) {
 func PageSize(pageSize int) func(*Engine) {
 	return func(engine *Engine) {
 		engine.PageSize = pageSize
+	}
+}
+
+// MaxFailures set the limit of failures of the current engine
+func MaxFailures(maxFailures int) func(*Engine) {
+	return func(engine *Engine) {
+		engine.MaxFailures = maxFailures
+	}
+}
+
+// MaxRecoveries set the limit of recoveries of the current engine
+func MaxRecoveries(maxRecoveries int) func(*Engine) {
+	return func(engine *Engine) {
+		engine.MaxRecoveries = maxRecoveries
 	}
 }
 
