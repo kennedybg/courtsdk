@@ -59,9 +59,7 @@ var ControlConfig = getDefaultControlConfig()
 
 //ResetConfigsToDefault use to reset all configs to the default values.
 func ResetConfigsToDefault() {
-	configMutex.Lock()
 	ElasticConfig = getDefaultElasticConfig()
 	EngineConfig = getDefaultEngineConfig()
 	ControlConfig = getDefaultControlConfig()
-	configMutex.Unlock()
 }
