@@ -86,9 +86,23 @@ func RemoveUnusedChars(data string) string {
 	return pattern.ReplaceAllString(data, " ")
 }
 
+func getEngineMaxFailures() int {
+	ConfigMutex.Lock()
+	maxFailures := EngineMaxFailures
+	ConfigMutex.Unlock()
+	return maxFailures
+}
+
+//SetEngineMaxFailures use to define a new limit of failures to current engine
+func SetEngineMaxFailures(newValue int) {
+	ConfigMutex.Lock()
+	EngineMaxFailures = newValue
+	ConfigMutex.Unlock()
+}
+
 //HasMaxFailures check if reached the max failures
 func HasMaxFailures(failures *int) bool {
-	return *failures >= EngineMaxFailures
+	return *failures >= getEngineMaxFailures()
 }
 
 //GetElasticMapping - returns the default Elasticsearch mapping
