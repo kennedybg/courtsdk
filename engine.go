@@ -323,7 +323,7 @@ func (engine Engine) logSuccess() {
 
 func (engine Engine) logFailure() {
 	str := "[ENGINE] COURT -> " + engine.Court
-	str += " BASE -> " + engine.Base + " " + strconv.Itoa(engine.MaxRecoveries) + " times."
+	str += " BASE -> " + engine.Base + " " + strconv.Itoa(engine.MaxFailures) + " times."
 	str += " Last ID requested: " + strconv.Itoa(engine.CurrentIndex)
 	str += " Trying to recover from index -> " + strconv.Itoa(engine.Start)
 	log.Println(str)
