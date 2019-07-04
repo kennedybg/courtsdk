@@ -18,6 +18,8 @@ type Engine struct {
 	PageSize        int
 	CurrentIndex    int
 	Recoveries      int
+	MaxFailures     int
+	MaxRecoveries   int
 	Done            bool
 	IsConcurrent    bool
 	MaxReplicas     int

@@ -50,10 +50,14 @@ func GetEnvString(envVar string, Default string) string {
 
 //GetDefaultcollector - return the default collector (colly)
 func GetDefaultcollector() *colly.Collector {
+	ConfigMutex.Lock()
 	collector := colly.NewCollector(colly.Async(EngineConfig["IsAsync"].(bool)))
+	ConfigMutex.Unlock()
 	if Debug() == "REQUEST" || Debug() == "ALL" {
+		ConfigMutex.Lock()
 		collector = colly.NewCollector(colly.Async(EngineConfig["IsAsync"].(bool)),
 			colly.Debugger(&debug.LogDebugger{}))
+		ConfigMutex.Unlock()
 	}
 	transport := &http.Transport{}
 	transport.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
@@ -63,7 +67,10 @@ func GetDefaultcollector() *colly.Collector {
 
 //GetNewContext - return a new context with default timeout and context cancelation function.
 func GetNewContext() (context.Context, context.CancelFunc) {
-	return context.WithTimeout(context.Background(), EngineConfig["RequestTimeout"].(time.Duration)*time.Second)
+	ConfigMutex.Lock()
+	newContext, cancelFunction := context.WithTimeout(context.Background(), EngineConfig["RequestTimeout"].(time.Duration)*time.Second)
+	ConfigMutex.Unlock()
+	return newContext, cancelFunction
 }
 
 //GenerateMD5 - returns the MD5 hash of the given pointer value.
@@ -77,11 +84,6 @@ func GenerateMD5(data *string) string {
 func RemoveUnusedChars(data string) string {
 	pattern := regexp.MustCompile(`(\s*<!--.*-->\s*)|(\s+)`)
 	return pattern.ReplaceAllString(data, " ")
-}
-
-//HasMaxFailures check if reached the max failures
-func HasMaxFailures(failures *int) bool {
-	return *failures >= EngineConfig["MaxFailures"].(int)
 }
 
 //GetElasticMapping - returns the default Elasticsearch mapping
