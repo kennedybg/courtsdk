@@ -229,6 +229,7 @@ func (engine *Engine) GetDocumentType() string {
 
 func (engine *Engine) runAsSequential() {
 	engine.InitElastic()
+	engine.Collector = GetDefaultcollector()
 	if engine.ConnectedToIndex() {
 		engine.Recoveries = 0
 		for engine.Recoveries < engine.MaxRecoveries {
