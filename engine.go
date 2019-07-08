@@ -14,7 +14,6 @@ import (
 // NewEngine creates a new Engine instance with default configuration
 func NewEngine(options ...func(*Engine)) *Engine {
 	engine := &Engine{}
-	engine.Collector = GetDefaultcollector()
 	engine.ResponseChannel = make(chan int)
 	engine.PageSize = 1
 	engine.MaxFailures = 25
@@ -229,9 +228,10 @@ func (engine *Engine) GetDocumentType() string {
 
 func (engine *Engine) runAsSequential() {
 	engine.InitElastic()
+	engine.Collector = GetDefaultcollector()
 	if engine.ConnectedToIndex() {
 		engine.Recoveries = 0
-		for engine.Recoveries < engine.MaxRecoveries {
+		for engine.Recoveries <= engine.MaxRecoveries {
 			engine.EntryPoint(engine)
 			if engine.Done {
 				engine.logSuccess()
@@ -278,7 +278,7 @@ func (engine Engine) spawnEngine(activeEnginesChannel chan int, maxEnginesChanne
 	elasticMutex.Unlock()
 	if connectedToIndex {
 		engine.setRange(elasticMutex)
-		for engine.Recoveries < engine.MaxRecoveries {
+		for engine.Recoveries <= engine.MaxRecoveries {
 			engine.EntryPoint(&engine)
 			if engine.Done {
 				engine.logSuccess()
