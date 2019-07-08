@@ -232,7 +232,7 @@ func (engine *Engine) runAsSequential() {
 	engine.Collector = GetDefaultcollector()
 	if engine.ConnectedToIndex() {
 		engine.Recoveries = 0
-		for engine.Recoveries < engine.MaxRecoveries {
+		for engine.Recoveries <= engine.MaxRecoveries {
 			engine.EntryPoint(engine)
 			if engine.Done {
 				engine.logSuccess()
@@ -279,7 +279,7 @@ func (engine Engine) spawnEngine(activeEnginesChannel chan int, maxEnginesChanne
 	elasticMutex.Unlock()
 	if connectedToIndex {
 		engine.setRange(elasticMutex)
-		for engine.Recoveries < engine.MaxRecoveries {
+		for engine.Recoveries <= engine.MaxRecoveries {
 			engine.EntryPoint(&engine)
 			if engine.Done {
 				engine.logSuccess()
