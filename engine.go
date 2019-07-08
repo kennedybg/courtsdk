@@ -14,7 +14,6 @@ import (
 // NewEngine creates a new Engine instance with default configuration
 func NewEngine(options ...func(*Engine)) *Engine {
 	engine := &Engine{}
-	engine.Collector = GetDefaultcollector()
 	engine.ResponseChannel = make(chan int)
 	engine.PageSize = 1
 	engine.MaxFailures = 25
