@@ -228,10 +228,10 @@ func (engine *Engine) GetDocumentType() string {
 
 func (engine *Engine) runAsSequential() {
 	engine.InitElastic()
-	engine.Collector = GetDefaultcollector()
 	if engine.ConnectedToIndex() {
 		engine.Recoveries = 0
 		for engine.Recoveries <= engine.MaxRecoveries {
+			engine.Collector = GetDefaultcollector()
 			engine.EntryPoint(engine)
 			if engine.Done {
 				engine.logSuccess()
@@ -272,13 +272,13 @@ func (engine *Engine) runAsConcurrent() {
 
 func (engine Engine) spawnEngine(activeEnginesChannel chan int, maxEnginesChannel chan int, elasticMutex *sync.Mutex) {
 	engine.InitElastic()
-	engine.Collector = GetDefaultcollector()
 	elasticMutex.Lock()
 	connectedToIndex := engine.ConnectedToIndex()
 	elasticMutex.Unlock()
 	if connectedToIndex {
 		engine.setRange(elasticMutex)
 		for engine.Recoveries <= engine.MaxRecoveries {
+			engine.Collector = GetDefaultcollector()
 			engine.EntryPoint(&engine)
 			if engine.Done {
 				engine.logSuccess()
