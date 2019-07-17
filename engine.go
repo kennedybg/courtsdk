@@ -43,9 +43,7 @@ func Base(base string) func(*Engine) {
 // Start set the start index
 func Start(start int) func(*Engine) {
 	return func(engine *Engine) {
-		if engine.IsConcurrent {
-			ControlConfig["LastGoRoutineRange"] = start - 1
-		}
+		ControlConfig["LastGoRoutineRange"] = start
 		engine.Start = start
 	}
 }
@@ -299,13 +297,11 @@ func (engine Engine) spawnEngine(activeEnginesChannel chan int, maxEnginesChanne
 //SetRange - set a valid range for an engine
 func (engine *Engine) setRange(elasticMutex *sync.Mutex) {
 	lastRange := ControlConfig["LastGoRoutineRange"].(int)
-	engine.Start = lastRange + 1
-	engine.End = lastRange + engine.ReplicaRange
-	if lastRange < engine.End {
-		elasticMutex.Lock()
-		ControlConfig["LastGoRoutineRange"] = engine.End
-		elasticMutex.Unlock()
-	}
+	engine.Start = lastRange
+	engine.End = engine.Start + engine.ReplicaRange - 1
+	elasticMutex.Lock()
+	ControlConfig["LastGoRoutineRange"] = engine.End + 1
+	elasticMutex.Unlock()
 	log.Println("[INFO] New Engine replica RANGE: ", engine.Start, " to", engine.End)
 }
 
