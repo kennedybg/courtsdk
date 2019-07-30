@@ -387,8 +387,3 @@ func (engine Engine) doSetup() {
 func (engine *Engine) Done() {
 	engine.done = true
 }
-
-//IsDone - Returns the current state of done property.
-func (engine *Engine) IsDone() bool {
-	return engine.done
-}
