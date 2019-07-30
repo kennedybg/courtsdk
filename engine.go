@@ -227,18 +227,20 @@ func (engine *Engine) GetDocumentType() string {
 
 func (engine *Engine) channelControl() {
 	if engine.UseDefaultChannelControl {
-		defer engine.Lock.Done()
-		engine.Lock.Add(1)
-		for {
-			select {
-			case status := <-engine.ResponseChannel:
-				engine.handleChannelStatus(status)
-			default:
-				if engine.shouldStop() {
-					return
+		go func() {
+			defer engine.Lock.Done()
+			for {
+				select {
+				case status := <-engine.ResponseChannel:
+					engine.handleChannelStatus(status)
+				default:
+					if engine.shouldStop() {
+						return
+					}
 				}
 			}
-		}
+		}()
+		engine.Lock.Add(1)
 	}
 }
 
