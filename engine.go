@@ -248,7 +248,7 @@ func (engine *Engine) shouldStop() bool {
 		return true
 	} else if engine.IsConcurrent && engine.CurrentIndex > engine.End {
 		return true
-	} else if engine.Done {
+	} else if engine.done {
 		return true
 	}
 	return false
@@ -271,7 +271,7 @@ func (engine *Engine) runAsSequential() {
 			engine.channelControl()
 			engine.EntryPoint(engine)
 			engine.Lock.Wait()
-			if engine.Done {
+			if engine.done {
 				engine.logSuccess()
 				return
 			}
@@ -320,7 +320,7 @@ func (engine Engine) spawnEngine(activeEnginesChannel chan int, maxEnginesChanne
 			engine.channelControl()
 			engine.EntryPoint(&engine)
 			engine.Lock.Wait()
-			if engine.Done {
+			if engine.done {
 				engine.logSuccess()
 				activeEnginesChannel <- -1
 				return
@@ -336,7 +336,6 @@ func (engine Engine) spawnEngine(activeEnginesChannel chan int, maxEnginesChanne
 	activeEnginesChannel <- -1
 }
 
-//SetRange - set a valid range for an engine
 func (engine *Engine) setRange(elasticMutex *sync.Mutex) {
 	lastRange := ControlConfig["LastGoRoutineRange"].(int)
 	engine.Start = lastRange
@@ -373,4 +372,9 @@ func (engine Engine) doSetup() {
 		return
 	}
 	engine.Setup()
+}
+
+//Done - Set the done property to true.
+func (engine *Engine) Done() {
+	engine.done = true
 }

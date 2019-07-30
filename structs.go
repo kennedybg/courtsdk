@@ -20,7 +20,7 @@ type Engine struct {
 	Recoveries               int
 	MaxFailures              int
 	MaxRecoveries            int
-	Done                     bool
+	done                     bool
 	IsConcurrent             bool
 	UseDefaultChannelControl bool
 	MaxReplicas              int
