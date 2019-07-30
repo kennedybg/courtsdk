@@ -77,6 +77,13 @@ func MaxRecoveries(maxRecoveries int) func(*Engine) {
 	}
 }
 
+// UseDefaultChannelControl ...
+func UseDefaultChannelControl(useDefault bool) func(*Engine) {
+	return func(engine *Engine) {
+		engine.UseDefaultChannelControl = useDefault
+	}
+}
+
 // Collector set the engine private collector (colly)
 func Collector(collector *colly.Collector) func(*Engine) {
 	return func(engine *Engine) {
