@@ -10,26 +10,27 @@ import (
 
 //Engine is a structure used for define information of a engine.
 type Engine struct {
-	Court           string
-	Base            string
-	Failures        int
-	Start           int
-	End             int
-	PageSize        int
-	CurrentIndex    int
-	Recoveries      int
-	MaxFailures     int
-	MaxRecoveries   int
-	Done            bool
-	IsConcurrent    bool
-	MaxReplicas     int
-	ReplicaRange    int
-	Setup           func()
-	EntryPoint      func(engine *Engine)
-	ResponseChannel chan int
-	Collector       *colly.Collector
-	ElasticClient   *elastic.Client
-	Lock            *sync.WaitGroup
+	Court                    string
+	Base                     string
+	Failures                 int
+	Start                    int
+	End                      int
+	PageSize                 int
+	CurrentIndex             int
+	Recoveries               int
+	MaxFailures              int
+	MaxRecoveries            int
+	done                     bool
+	IsConcurrent             bool
+	UseDefaultChannelControl bool
+	MaxReplicas              int
+	ReplicaRange             int
+	Setup                    func()
+	EntryPoint               func(engine *Engine)
+	ResponseChannel          chan int
+	Collector                *colly.Collector
+	ElasticClient            *elastic.Client
+	Lock                     *sync.WaitGroup
 }
 
 //Jurisprudence is a structure used for serializing/deserializing data in Elasticsearch.

@@ -18,6 +18,7 @@ func NewEngine(options ...func(*Engine)) *Engine {
 	engine.PageSize = 1
 	engine.MaxFailures = 25
 	engine.MaxRecoveries = 5
+	engine.UseDefaultChannelControl = true
 	var wg sync.WaitGroup
 	engine.Lock = &wg
 	for _, attr := range options {
@@ -73,6 +74,13 @@ func MaxFailures(maxFailures int) func(*Engine) {
 func MaxRecoveries(maxRecoveries int) func(*Engine) {
 	return func(engine *Engine) {
 		engine.MaxRecoveries = maxRecoveries
+	}
+}
+
+// UseDefaultChannelControl ...
+func UseDefaultChannelControl(useDefault bool) func(*Engine) {
+	return func(engine *Engine) {
+		engine.UseDefaultChannelControl = useDefault
 	}
 }
 
@@ -224,14 +232,55 @@ func (engine *Engine) GetDocumentType() string {
 	}
 }
 
+func (engine *Engine) channelControl() {
+	if engine.UseDefaultChannelControl {
+		go func() {
+			defer engine.Lock.Done()
+			for {
+				select {
+				case status := <-engine.ResponseChannel:
+					engine.handleChannelStatus(status)
+				default:
+					if engine.shouldStop() {
+						return
+					}
+				}
+			}
+		}()
+		engine.Lock.Add(1)
+	}
+}
+
+func (engine *Engine) shouldStop() bool {
+	if engine.Failures >= engine.MaxFailures {
+		log.Println("[FAILED] The engine ["+engine.Base+"] has failed ", engine.Failures, " times.")
+		return true
+	} else if engine.IsConcurrent && engine.CurrentIndex > engine.End {
+		return true
+	} else if engine.done {
+		return true
+	}
+	return false
+}
+
+func (engine *Engine) handleChannelStatus(status int) {
+	if status != http.StatusOK {
+		engine.Failures++
+	} else if engine.Failures > 0 {
+		engine.Failures--
+	}
+}
+
 func (engine *Engine) runAsSequential() {
 	engine.InitElastic()
 	if engine.ConnectedToIndex() {
 		engine.Recoveries = 0
 		for engine.Recoveries <= engine.MaxRecoveries {
 			engine.Collector = GetDefaultcollector()
+			engine.channelControl()
 			engine.EntryPoint(engine)
-			if engine.Done {
+			engine.Lock.Wait()
+			if engine.done {
 				engine.logSuccess()
 				return
 			}
@@ -277,8 +326,10 @@ func (engine Engine) spawnEngine(activeEnginesChannel chan int, maxEnginesChanne
 		engine.setRange(elasticMutex)
 		for engine.Recoveries <= engine.MaxRecoveries {
 			engine.Collector = GetDefaultcollector()
+			engine.channelControl()
 			engine.EntryPoint(&engine)
-			if engine.Done {
+			engine.Lock.Wait()
+			if engine.done {
 				engine.logSuccess()
 				activeEnginesChannel <- -1
 				return
@@ -294,7 +345,6 @@ func (engine Engine) spawnEngine(activeEnginesChannel chan int, maxEnginesChanne
 	activeEnginesChannel <- -1
 }
 
-//SetRange - set a valid range for an engine
 func (engine *Engine) setRange(elasticMutex *sync.Mutex) {
 	lastRange := ControlConfig["LastGoRoutineRange"].(int)
 	engine.Start = lastRange
@@ -331,4 +381,9 @@ func (engine Engine) doSetup() {
 		return
 	}
 	engine.Setup()
+}
+
+//Done - Set the done property to true.
+func (engine *Engine) Done() {
+	engine.done = true
 }
