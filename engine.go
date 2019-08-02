@@ -298,7 +298,7 @@ func (engine *Engine) runAsConcurrent() {
 	maxEngines := engine.MaxReplicas
 	activeEnginesChannel := make(chan int)
 	maxEnginesChannel := make(chan int)
-	elasticMutex := sync.Mutex{}
+	mutex := sync.Mutex{}
 	for {
 		if activeEngines == 0 && maxEngines == 0 {
 			return
@@ -311,19 +311,19 @@ func (engine *Engine) runAsConcurrent() {
 		default:
 			if activeEngines < maxEngines {
 				activeEngines++
-				go engine.spawnEngine(activeEnginesChannel, maxEnginesChannel, &elasticMutex)
+				go engine.spawnEngine(activeEnginesChannel, maxEnginesChannel, &mutex)
 			}
 		}
 	}
 }
 
-func (engine Engine) spawnEngine(activeEnginesChannel chan int, maxEnginesChannel chan int, elasticMutex *sync.Mutex) {
+func (engine Engine) spawnEngine(activeEnginesChannel chan int, maxEnginesChannel chan int, mutex *sync.Mutex) {
 	engine.InitElastic()
-	elasticMutex.Lock()
+	mutex.Lock()
 	connectedToIndex := engine.ConnectedToIndex()
-	elasticMutex.Unlock()
+	mutex.Unlock()
 	if connectedToIndex {
-		engine.setRange(elasticMutex)
+		engine.setRange(mutex)
 		for engine.Recoveries <= engine.MaxRecoveries {
 			engine.Collector = GetDefaultcollector()
 			engine.channelControl()
@@ -345,13 +345,15 @@ func (engine Engine) spawnEngine(activeEnginesChannel chan int, maxEnginesChanne
 	activeEnginesChannel <- -1
 }
 
-func (engine *Engine) setRange(elasticMutex *sync.Mutex) {
+func (engine *Engine) setRange(mutex *sync.Mutex) {
 	lastRange := ControlConfig["LastGoRoutineRange"].(int)
-	engine.Start = lastRange
+	if lastRange > -1 {
+		engine.Start = lastRange
+	}
 	engine.End = engine.Start + engine.ReplicaRange - 1
-	elasticMutex.Lock()
+	mutex.Lock()
 	ControlConfig["LastGoRoutineRange"] = engine.End + 1
-	elasticMutex.Unlock()
+	mutex.Unlock()
 	log.Println("[INFO] New Engine replica RANGE: ", engine.Start, " to", engine.End)
 }
 
