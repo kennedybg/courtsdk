@@ -281,9 +281,11 @@ func (engine *Engine) runAsSequential() {
 			engine.channelControl()
 			engine.EntryPoint(engine)
 			engine.Lock.Wait()
+
 			if engine.done || engine.Closed {
 				return
 			}
+
 			engine.logFailure()
 			engine.setRecoveryStart()
 			time.Sleep(ControlConfig["ActionDelay"].(time.Duration) * time.Second)
@@ -304,6 +306,7 @@ func (engine *Engine) runAsConcurrent() {
 		if activeEngines == 0 && maxEngines == 0 {
 			return
 		}
+
 		select {
 		case value := <-activeEnginesChannel:
 			activeEngines += value
@@ -314,13 +317,15 @@ func (engine *Engine) runAsConcurrent() {
 		default:
 			if activeEngines < maxEngines {
 				activeEngines++
-				go engine.spawnEngine(activeEnginesChannel, maxEnginesChannel, &mutex)
+				go engine.spawnEngine(activeEnginesChannel, maxEnginesChannel, closeEngineChannel, &mutex)
 			}
 		}
 	}
 }
 
-func (engine Engine) spawnEngine(activeEnginesChannel chan int, maxEnginesChannel chan int, mutex *sync.Mutex) {
+func (engine Engine) spawnEngine(activeEnginesChannel chan int, maxEnginesChannel chan int,
+	closeEngineChannel chan bool, mutex *sync.Mutex) {
+
 	engine.InitElastic()
 	mutex.Lock()
 	connectedToIndex := engine.ConnectedToIndex()
@@ -332,14 +337,17 @@ func (engine Engine) spawnEngine(activeEnginesChannel chan int, maxEnginesChanne
 			engine.channelControl()
 			engine.EntryPoint(&engine)
 			engine.Lock.Wait()
+
 			if engine.Closed {
 				closeEngineChannel <- true
 				return
 			}
+
 			if engine.done {
 				activeEnginesChannel <- -1
 				return
 			}
+
 			engine.logFailure()
 			engine.setRecoveryStart()
 			time.Sleep(ControlConfig["ActionDelay"].(time.Duration) * time.Second)
