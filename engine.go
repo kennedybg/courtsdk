@@ -313,6 +313,7 @@ func (engine *Engine) runAsConcurrent() {
 		case value := <-maxEnginesChannel:
 			maxEngines += value
 		case <-closeEngineChannel:
+			activeEngines -= 1
 			maxEngines = 0
 		default:
 			if activeEngines < maxEngines {
