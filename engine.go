@@ -19,6 +19,7 @@ func NewEngine(options ...func(*Engine)) *Engine {
 	engine.MaxFailures = 25
 	engine.MaxRecoveries = 5
 	engine.UseDefaultChannelControl = true
+	engine.Closed = false
 	var wg sync.WaitGroup
 	engine.Lock = &wg
 	for _, attr := range options {
@@ -257,7 +258,7 @@ func (engine *Engine) shouldStop() bool {
 		return true
 	} else if engine.IsConcurrent && engine.CurrentIndex > engine.End {
 		return true
-	} else if engine.done {
+	} else if engine.done || engine.Closed {
 		return true
 	}
 	return false
@@ -280,10 +281,11 @@ func (engine *Engine) runAsSequential() {
 			engine.channelControl()
 			engine.EntryPoint(engine)
 			engine.Lock.Wait()
-			if engine.done {
-				engine.logSuccess()
+
+			if engine.done || engine.Closed {
 				return
 			}
+
 			engine.logFailure()
 			engine.setRecoveryStart()
 			time.Sleep(ControlConfig["ActionDelay"].(time.Duration) * time.Second)
@@ -298,26 +300,33 @@ func (engine *Engine) runAsConcurrent() {
 	maxEngines := engine.MaxReplicas
 	activeEnginesChannel := make(chan int)
 	maxEnginesChannel := make(chan int)
+	closeEngineChannel := make(chan bool)
 	mutex := sync.Mutex{}
 	for {
 		if activeEngines == 0 && maxEngines == 0 {
 			return
 		}
+
 		select {
 		case value := <-activeEnginesChannel:
 			activeEngines += value
 		case value := <-maxEnginesChannel:
 			maxEngines += value
+		case <-closeEngineChannel:
+			activeEngines -= 1
+			maxEngines = 0
 		default:
 			if activeEngines < maxEngines {
 				activeEngines++
-				go engine.spawnEngine(activeEnginesChannel, maxEnginesChannel, &mutex)
+				go engine.spawnEngine(activeEnginesChannel, maxEnginesChannel, closeEngineChannel, &mutex)
 			}
 		}
 	}
 }
 
-func (engine Engine) spawnEngine(activeEnginesChannel chan int, maxEnginesChannel chan int, mutex *sync.Mutex) {
+func (engine Engine) spawnEngine(activeEnginesChannel chan int, maxEnginesChannel chan int,
+	closeEngineChannel chan bool, mutex *sync.Mutex) {
+
 	engine.InitElastic()
 	mutex.Lock()
 	connectedToIndex := engine.ConnectedToIndex()
@@ -329,11 +338,17 @@ func (engine Engine) spawnEngine(activeEnginesChannel chan int, maxEnginesChanne
 			engine.channelControl()
 			engine.EntryPoint(&engine)
 			engine.Lock.Wait()
+
+			if engine.Closed {
+				closeEngineChannel <- true
+				return
+			}
+
 			if engine.done {
-				engine.logSuccess()
 				activeEnginesChannel <- -1
 				return
 			}
+
 			engine.logFailure()
 			engine.setRecoveryStart()
 			time.Sleep(ControlConfig["ActionDelay"].(time.Duration) * time.Second)
@@ -387,5 +402,12 @@ func (engine Engine) doSetup() {
 
 //Done - Set the done property to true.
 func (engine *Engine) Done() {
+	engine.logSuccess()
 	engine.done = true
+}
+
+//Close - Closes engine by engine of the crawler
+func (engine *Engine) Close(reason string) {
+	log.Println("[CLOSED]", reason)
+	engine.Closed = true
 }
